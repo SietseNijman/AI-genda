@@ -1,0 +1,52 @@
+#! python
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree, metrics
+from sklearn.svm import SVC
+import pandas as pd;
+from sklearn.metrics import r2_score
+
+sessions = pd.read_csv('C:/Users/Siets/OneDrive/Documenten/TUE/Embodying Intelligent Behavior/one hot encoder/Data 10 Students - Sheet1 (3).csv');
+
+# create training dataset - input and output -- create classes
+X = sessions[["English","Dutch", "French", "Booktest", "Grammar Test", "Reading Test", "Oral Test", "Weight", "Attendance","G1"]].to_numpy(); 
+
+y_temp = sessions[["G1"]];
+y_temp.G1[y_temp.G1 < 55] = 0
+y_temp.G1[y_temp.G1 >= 55] = 1
+Y = y_temp.to_numpy();
+        
+# create training/test dataset
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=2); 
+
+svm = SVC(kernel='linear')
+svm.fit(X_train, Y_train);  
+svm_prediction = svm.predict(X_test); 
+print("SVM Accuracy:",metrics.accuracy_score(Y_test, svm_prediction))
+print(confusion_matrix(Y_test, svm_prediction));
+print("SVM r2:",r2_score(Y_test, svm_prediction))  
+    
+# multilayer perceptron classification
+mlp = MLPClassifier(activation='logistic', max_iter=5000, solver='lbfgs', hidden_layer_sizes=(2, 5), random_state=42)
+mlp.fit(X_train, Y_train)
+mlp_prediction = mlp.predict(X_test); 
+print("MLP Accuracy:",metrics.accuracy_score(Y_test, mlp_prediction))
+print(confusion_matrix(Y_test, mlp_prediction));
+print("MLP r2:",r2_score(Y_test, mlp_prediction)) 
+
+# Decision Tree calssification
+clf = tree.DecisionTreeClassifier(random_state=10); 
+clf.fit(X_train, Y_train)
+clf_prediction = clf.predict(X_test)
+print("DT Accuracy:",metrics.accuracy_score(Y_test, clf_prediction))
+print(confusion_matrix(Y_test, clf_prediction)); 
+print("DT r2:",r2_score(Y_test, clf_prediction)) 
+
+rf = RandomForestClassifier(n_estimators=150, criterion = 'entropy')
+rf.fit(X_train, Y_train)
+rf_prediction = rf.predict(X_test)
+print("RF Accuracy:",metrics.accuracy_score(Y_test, rf_prediction))
+print(confusion_matrix(Y_test, rf_prediction)); 
+print("RF r2:",r2_score(Y_test, rf_prediction)) 
