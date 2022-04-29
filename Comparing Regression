@@ -1,0 +1,126 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct 20 20:34:56 2021
+
+@author: Siets
+"""
+
+import matplotlib.pyplot as plt; 
+import numpy as np;
+from sklearn.neural_network import MLPRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+from sklearn.svm import SVR
+import pandas as pd;
+from sklearn.metrics import confusion_matrix
+from sklearn import tree, metrics
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+import seaborn as sns
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import make_column_transformer
+
+sessions = pd.read_csv('C:/Users/Siets/OneDrive/Documenten/TUE/Embodying Intelligent Behavior/one hot encoder/Copy of Data 10 Students - Sheet1.csv');
+
+# create training dataset - input and output
+#G = "G1"
+X = sessions[["Subject","Test", "Weight", "Attendance","G1"]].to_numpy(); 
+Y = sessions[["Time"]].to_numpy();
+
+# Data Visualisation
+# Building the Correlation matrix
+sns.heatmap(sessions.corr())
+plt.show();
+
+# create training/test dataset
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=0); 
+
+svr = SVR(kernel='rbf', C=200)
+svr.fit(X_train, Y_train);  
+
+svr_prediction = svr.predict(X_test); 
+svr_mse = mean_squared_error(Y_test, svr_prediction)
+svr_rmse1 = np.sqrt(svr_mse)
+
+plt.plot(svr_prediction, 'b', label = "predicted scores"); 
+plt.plot(Y_test, 'r', label = "real_scores"); 
+plt.legend()
+plt.title("svr rbf prediction")
+plt.show();
+
+print("Accuracy rbf:",r2_score(Y_test, svr_prediction))  
+
+#print("Accuracy rbf:",metrics.accuracy_score(Y_test, svr_prediction))
+#print(confusion_matrix(Y_test, svr_prediction));
+
+
+svrl = SVR(kernel='linear', C=200)
+svrl.fit(X_train, Y_train);  
+
+svr_prediction = svrl.predict(X_test); 
+svr_mse_linear = mean_squared_error(Y_test, svr_prediction)
+svr_rmse1_linear = np.sqrt(svr_mse_linear)
+
+plt.plot(svr_prediction, 'b', label = "predicted scores"); 
+plt.plot(Y_test, 'r', label = "real_scores"); 
+plt.legend()
+plt.title("svr linear prediction")
+plt.show();
+
+print("Accuracy linear:",r2_score(Y_test, svr_prediction))  
+
+#print("Accuracy linear:",metrics.accuracy_score(Y_test, svr_prediction))
+#print(confusion_matrix(Y_test, svr_prediction));
+
+mlr = MLPRegressor(activation='tanh', max_iter=5000, solver='lbfgs', hidden_layer_sizes=(2, 3), random_state=0)
+mlr.fit(X_train, Y_train)
+mlr_prediction = mlr.predict(X_test); 
+mlr_mse = mean_squared_error(Y_test, mlr_prediction)
+mlr_rmse1 = np.sqrt(mlr_mse)
+
+plt.plot(mlr_prediction,  'b', label = "predicted scores"); 
+plt.plot(Y_test, 'r', label = "real_scores"); 
+plt.legend()
+plt.title("mlp prediction")
+plt.show(); 
+
+print("Accuracy mlr:",r2_score(Y_test, mlr_prediction))
+
+lr = LinearRegression()
+lr.fit(X_train, Y_train)
+lr_prediction = lr.predict(X_test)
+lr_mse = mean_squared_error(Y_test, mlr_prediction)
+lr_rmse1 = np.sqrt(mlr_mse)
+
+plt.plot(lr_prediction,  'b', label = "predicted scores"); 
+plt.plot(Y_test, 'r', label = "real_scores"); 
+plt.legend()
+plt.title("lr prediction")
+plt.show();
+
+print("Accuracy lr:",r2_score(Y_test, lr_prediction))
+
+#based on hours 6, Attendance 4, Type of Test: reading test, weight 2, subject english
+#prediction grade G3
+
+ToT = 2 #type of test (only 4 type of test, booktest =1 grammar test =2, reading test =3, oraltest =4)
+Att = 10 #attendance max 10
+Sub = 1 #subject (only 3 subject:Eng =1, French=2, Dutch=3)
+DESSC = 55 #Desired grade input from students
+Weight = 1 #weight of test = fixed weight input by teacher choose 1,2,3
+
+predictedhrsSpent1 = svr.predict([[Att, ToT, Weight,Sub,DESSC]])
+
+ToT = 2 #type of test (only 4 type of test, booktest =1 grammar test =2, reading test =3, oraltest =4)
+Att = 10 #attendance max 10
+Sub = 1 #subject (only 3 subject:Eng =1, French=2, Dutch=3)
+DESSC = 70 #Desired grade input from students
+Weight = 1 #weight of test = fixed weight input by teacher choose 1,2,3
+
+predictedhrsSpent2 = svr.predict([[Att, ToT, Weight,Sub,DESSC]])
+
+#encode data again
+
+print("Study Hours", predictedhrsSpent1)
+print("Study Hours", predictedhrsSpent2)
+   
