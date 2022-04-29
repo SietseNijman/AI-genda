@@ -1,0 +1,66 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct 20 22:34:20 2021
+
+@author: Siets
+"""
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+#get_ipython().run_line_magic('matplotlib', 'inline')
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import linear_model
+
+school = pd.read_csv('C:/Users/Siets/OneDrive/Documenten/TUE/Embodying Intelligent Behavior/Data Students.csv')
+
+G= 'G1' # manually change input G1,G2 or G3
+
+X = school[['Attendance','Test', 'Weight', 'Subject', G]].to_numpy();
+y = school['Time'].to_numpy();
+
+# x train set
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.33, random_state=0
+)
+
+
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+regr = linear_model.LinearRegression()
+regr.fit(X_test, y_test)
+
+#predict hours Grade 
+y_pred = regressor.predict(X_test)
+y_pred
+
+
+#based on hours 6, Attendance 4, Type of Test: reading test, weight 2, subject english
+#prediction grade G3
+
+ToT = 2 #type of test (only 4 type of test, booktest =1 grammar test =2, reading test =3, oraltest =4)
+Att = 10 #attendance max 10
+Sub = 1 #subject (only 3 subject:Eng =1, French=2, Dutch=3)
+DESSC = 100 #Desired grade input from students
+Weight = 1 #weight of test = fixed weight input by teacher choose 1,2,3
+
+predictedhrsSpent = regr.predict([[Att, ToT, Weight,Sub,DESSC]])
+
+print(predictedhrsSpent)
+
+#prediction model accuracy
+from sklearn.metrics import r2_score
+print(r2_score(y_test, y_pred))
+
+school = pd.DataFrame({'Actual Time': y_test, 'Predicted Time': y_pred})
+school
+
+plt.plot(y_pred,  'b', label = "predicted Time"); 
+plt.plot(y_test, 'r', label = "real_Time"); 
+plt.legend()
+plt.show();
